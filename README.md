@@ -1,4 +1,5 @@
 # go-localstack-demo
+<img src="./assets/sqs-sns.png">
 
 #### Prerequisite
 
@@ -10,13 +11,13 @@
 curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
 ```
 
-1. Install aws-cli
+2. Install aws-cli
 
 ```bash
 sudo installer -pkg AWSCLIV2.pkg -target /
 ```
 
-1. Verify
+3. Verify
 
 ```bash
 aws --version
