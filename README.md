@@ -75,3 +75,8 @@ Clean docker system
 ```bash
 make clean
 ```
+
+##### *Request sending message*
+```bash
+curl "http://localhost:7777/publish?message=hello%20from%20sns
+```
