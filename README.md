@@ -91,3 +91,14 @@ Sync files from s3 to local directory `/s3-upload`
 ```bash
 make sync-s3
 ```
+
+##### KMS Request encryption/decryption
+
+Request encrypt text
+```bash
+make request-encrypt
+```
+Request decrypt text
+```bash
+make request-decrypt
+```
