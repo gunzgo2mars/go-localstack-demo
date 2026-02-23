@@ -28,5 +28,11 @@ upload-s3:
 sync-s3:
 	aws s3 sync s3://localstack-bucket ./s3-upload --endpoint-url=http://localhost:4566
 
+request-encrypt:
+	curl -X POST http://localhost:7777/encrypt -H "Content-Type: application/json" -d '{"text":"Testing encrypt"}'
+
+request-decrypt:
+	curl -X POST http://localhost:7777/decrypt -H "Content-Type: application/json" -d '{"ciphertext":"YTYxOTQ4ZjYtMTQ2MS00MzFhLTgxM2UtOTlhZDk5MTQwODFmJR6MQN9702NZvtiBqUBeu1OmNoUaz1VkpEy3TqvCg2V0QG7+CGaiDN/SWwrz6PwE"}'
+
 clean:
 	docker system prune -f

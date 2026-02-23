@@ -42,4 +42,15 @@ echo "Creating S3 bucket..."
 awslocal s3 mb s3://localstack-bucket
 echo "S3 bucket ready"
 
+echo "🔐 Creating KMS key..."
+KEY_ID=$(awslocal kms create-key \
+  --query 'KeyMetadata.KeyId' \
+  --output text)
+echo "KMS Key ID: $KEY_ID"
+
+# Optional alias
+awslocal kms create-alias \
+  --alias-name alias/localstack-kms \
+  --target-key-id $KEY_ID
+
 echo "✅ Infrastructure is ready"
