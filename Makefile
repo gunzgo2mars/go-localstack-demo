@@ -1,5 +1,5 @@
 # config
-COMPOSE=docker compose
+COMPOSE=docker-compose
 LOCALSTACK=localstack
 
 # cli
@@ -21,6 +21,12 @@ run-consume-service:
 
 logs-localstack:
 	$(COMPOSE) logs -f $(LOCALSTACK)
+
+upload-s3:
+	curl -X POST http://localhost:7777/upload -F "file=@file.txt"
+
+sync-s3:
+	aws s3 sync s3://localstack-bucket ./s3-upload --endpoint-url=http://localhost:4566
 
 clean:
 	docker system prune -f

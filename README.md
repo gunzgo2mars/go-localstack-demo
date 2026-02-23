@@ -80,3 +80,14 @@ make clean
 ```bash
 curl "http://localhost:7777/publish?message=hello%20from%20sns
 ```
+
+##### S3 Request & Sync
+
+Upload file to s3
+```bash
+make upload-s3
+```
+Sync files from s3 to local directory `/s3-upload`
+```bash
+make sync-s3
+```
