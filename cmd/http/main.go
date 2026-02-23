@@ -2,17 +2,22 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/gunzgo2mars/go-localstack-demo/pkg/awsconfig"
 )
 
 func main() {
 
+	ctx := context.Background()
 	endpoint := os.Getenv("AWS_ENDPOINT")
 	region := os.Getenv("AWS_REGION")
 	topicArn := os.Getenv("TOPIC_ARN")
@@ -22,20 +27,63 @@ func main() {
 		log.Fatalf("Error: %s", err.Error())
 	}
 
-	client := sns.NewFromConfig(awsConfig)
+	// SNS
+	snsClient := sns.NewFromConfig(awsConfig)
 
+	// S3
+	s3Client := s3.NewFromConfig(
+		awsConfig,
+		func(o *s3.Options) {
+			o.UsePathStyle = true
+		},
+	)
+	uploader := transfermanager.New(
+		s3Client,
+		func(o *transfermanager.Options) {
+			o.PartSizeBytes = 10 * 1024 * 1024
+			o.Concurrency = 5
+		},
+	)
+
+	// SNS Publishing message handler
 	http.HandleFunc("/publish", func(w http.ResponseWriter, r *http.Request) {
 
 		message := r.URL.Query().Get("message")
 
-		client.Publish(context.TODO(), &sns.PublishInput{
+		snsClient.Publish(context.TODO(), &sns.PublishInput{
 			TopicArn: aws.String(topicArn),
 			Message:  aws.String(message),
 		})
 
 		w.Write([]byte("message sent"))
-
 	})
 
+	// S3 Uploader handler
+	http.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
+		file, header, err := r.FormFile("file")
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		defer file.Close()
+
+		result, err := uploader.UploadObject(
+			ctx,
+			&transfermanager.UploadObjectInput{
+				Bucket: aws.String("localstack-bucket"),
+				Key:    aws.String(header.Filename),
+				Body:   file,
+			},
+		)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		slog.Info(fmt.Sprintf("Uploaded: %s", *result.Key))
+		w.Write([]byte("Upload successfully"))
+	})
+
+	slog.Info("HTTP server running on :7777")
 	http.ListenAndServe(":7777", nil)
 }

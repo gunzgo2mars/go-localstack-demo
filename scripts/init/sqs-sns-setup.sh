@@ -38,4 +38,8 @@ awslocal sns subscribe \
   --notification-endpoint $QUEUE_ARN \
   --attributes RawMessageDelivery=true
 
+echo "Creating S3 bucket..."
+awslocal s3 mb s3://localstack-bucket
+echo "S3 bucket ready"
+
 echo "✅ Infrastructure is ready"
